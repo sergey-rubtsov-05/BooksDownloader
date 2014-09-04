@@ -1,0 +1,5 @@
+D:\BooksDownloader\BooksDownloader\bin\Debug\BooksDownloader.exe
+D:\BooksDownloader\BooksDownloader\bin\Debug\BooksDownloader.pdb
+D:\BooksDownloader\BooksDownloader\obj\x86\Debug\BooksDownloader.exe
+D:\BooksDownloader\BooksDownloader\obj\x86\Debug\BooksDownloader.pdb
+D:\BooksDownloader\BooksDownloader\obj\x86\Debug\BooksDownloader.csprojResolveAssemblyReference.cache
