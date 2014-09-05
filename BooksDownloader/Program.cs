@@ -5,6 +5,7 @@ using System.Text;
 using System.Net;
 using System.IO;
 using System.Xml.Linq;
+using Ionic.Zip;
 
 namespace BooksDownloader
 {
@@ -52,15 +53,42 @@ namespace BooksDownloader
             }
             els = ul.Elements();
             Dictionary<string, string> links = new Dictionary<string, string>();
+            char[] urlSeparator = { '/' };
+            string[] urlParts = null;
+            string urlTemplate = "http://108.160.149.68/valera/{0}.fb2.zip";
             foreach (var xElement in els)
             {
                 var link = xElement.Element("p").Element("a");
-                links.Add(link.Attribute("title").Value, link.Attribute("href").Value);
+                urlParts = link.Attribute("href").Value.Split(urlSeparator);
+                links.Add(link.Attribute("title").Value, string.Format(urlTemplate, urlParts[urlParts.Length-1]));
             }
 
             foreach (var link in links)
             {
                 Console.WriteLine(link);
+                try
+                {
+                    WebClient wc = new WebClient();
+                    Uri uri = new Uri(link.Value);
+                    string unpackDir = @"C:\Users\Сергей\Downloads\Книги\";
+                    string zipToUnpack = unpackDir + link.Key + ".zip";
+                    wc.DownloadFile(uri, zipToUnpack);
+                    Console.WriteLine("Book succeseful download");
+
+                    using (ZipFile zip = ZipFile.Read(zipToUnpack))
+                    {
+                        foreach (ZipEntry e in zip)
+                        {
+                            e.Extract(unpackDir);
+                        }
+                        Console.WriteLine("Unpack succeseful");
+                    }
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
 
             Console.Read();
