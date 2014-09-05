@@ -21,9 +21,13 @@ namespace BooksDownloader
             StreamReader stream = new StreamReader(myResponse.GetResponseStream());
             html = stream.ReadToEnd();
             //File.Create(@"C:\Users\Сергей\Desktop\1.xml");
-            
-            //File.WriteAllText(@"\1.xml", html);
-            Console.WriteLine(html);
+            while (html.IndexOf('&') != -1)
+            {
+                int startIndex = html.IndexOf('&');
+                html = html.Remove(startIndex, 1);
+            }
+            File.WriteAllText(@"\1.xml", html);
+            //Console.WriteLine(html);
 
             XDocument doc = XDocument.Load(@"\1.xml");
             var els = doc.Root.Element("body").Element("div").Elements();
