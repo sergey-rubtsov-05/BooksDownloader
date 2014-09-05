@@ -21,7 +21,7 @@ namespace BooksDownloader
             html = stream.ReadToEnd();
             //File.Create(@"C:\Users\Сергей\Desktop\1.xml");
             
-            File.WriteAllText(@"C:\Users\Сергей\Desktop\1.xml", html);
+            File.WriteAllText(@"\1.xml", html);
             Console.WriteLine(html);
 
             Console.Read();
