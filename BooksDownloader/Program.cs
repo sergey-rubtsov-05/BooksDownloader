@@ -13,84 +13,100 @@ namespace BooksDownloader
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("BOOKS READER");
-
-            string url = "http://knigosite.org/library/genres/113/page/1";
-            string html = String.Empty;
-            HttpWebRequest myRequest = (HttpWebRequest)HttpWebRequest.Create(url);
-            HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();
-            StreamReader stream = new StreamReader(myResponse.GetResponseStream());
-            html = stream.ReadToEnd();
-            //File.Create(@"C:\Users\Сергей\Desktop\1.xml");
-            while (html.IndexOf('&') != -1)
+            Console.WriteLine("BOOKS DOWNLOADER");
+            for (int i = 1; i <= 10; i++)
             {
-                int startIndex = html.IndexOf('&');
-                html = html.Remove(startIndex, 1);
-            }
-            File.WriteAllText(@"\1.xml", html);
-            //Console.WriteLine(html);
-
-            XDocument doc = XDocument.Load(@"\1.xml");
-            var els = doc.Root.Element("body").Element("div").Elements();
-            XElement mainDiv = null;
-            foreach (var xElement in els)
-            {
-                if (xElement.Attribute("class").Value == "main  library genres")
+                string url = "http://knigosite.org/library/genres/110/page/" + i.ToString();
+                string html = String.Empty;
+                HttpWebRequest myRequest = (HttpWebRequest)HttpWebRequest.Create(url);
+                HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();
+                StreamReader stream = new StreamReader(myResponse.GetResponseStream());
+                html = stream.ReadToEnd();
+                //File.Create(@"C:\Users\Сергей\Desktop\1.xml");
+                while (html.IndexOf('&') != -1)
                 {
-                    mainDiv = xElement;
-                    break;
+                    int startIndex = html.IndexOf('&');
+                    html = html.Remove(startIndex, 1);
                 }
-            }
-            els = mainDiv.Element("div").Element("div").Elements();
-            XElement ul = null;
-            foreach (var xElement in els)
-            {
-                if (xElement.HasAttributes && xElement.Attribute("class").Value == "lib_books_list books")
-                {
-                    ul = xElement;
-                    break;
-                }
-            }
-            els = ul.Elements();
-            Dictionary<string, string> links = new Dictionary<string, string>();
-            char[] urlSeparator = { '/' };
-            string[] urlParts = null;
-            string urlTemplate = "http://108.160.149.68/valera/{0}.fb2.zip";
-            foreach (var xElement in els)
-            {
-                var link = xElement.Element("p").Element("a");
-                urlParts = link.Attribute("href").Value.Split(urlSeparator);
-                links.Add(link.Attribute("title").Value, string.Format(urlTemplate, urlParts[urlParts.Length-1]));
-            }
+                File.WriteAllText(@"\1.xml", html);
+                //Console.WriteLine(html);
 
-            foreach (var link in links)
-            {
-                Console.WriteLine(link);
-                try
+                XDocument doc = XDocument.Load(@"\1.xml");
+                var els = doc.Root.Element("body").Element("div").Elements();
+                XElement mainDiv = null;
+                foreach (var xElement in els)
                 {
-                    WebClient wc = new WebClient();
-                    Uri uri = new Uri(link.Value);
-                    string unpackDir = @"C:\Users\Сергей\Downloads\Книги\";
-                    string zipToUnpack = unpackDir + link.Key + ".zip";
-                    wc.DownloadFile(uri, zipToUnpack);
-                    Console.WriteLine("Book succeseful download");
-
-                    using (ZipFile zip = ZipFile.Read(zipToUnpack))
+                    if (xElement.Attribute("class").Value == "main  library genres")
                     {
-                        foreach (ZipEntry e in zip)
-                        {
-                            e.Extract(unpackDir);
-                        }
-                        Console.WriteLine("Unpack succeseful");
+                        mainDiv = xElement;
+                        break;
                     }
-                    
                 }
-                catch (Exception e)
+                els = mainDiv.Element("div").Element("div").Elements();
+                XElement ul = null;
+                foreach (var xElement in els)
                 {
-                    Console.WriteLine(e);
+                    if (xElement.HasAttributes && xElement.Attribute("class").Value == "lib_books_list books")
+                    {
+                        ul = xElement;
+                        break;
+                    }
+                }
+                els = ul.Elements();
+                Dictionary<string, string> links = new Dictionary<string, string>();
+                char[] urlSeparator = { '/' };
+                string[] urlParts = null;
+                string urlTemplate = "http://108.160.149.68/valera/{0}.fb2.zip";
+                foreach (var xElement in els)
+                {
+                    var link = xElement.Element("p").Element("a");
+                    urlParts = link.Attribute("href").Value.Split(urlSeparator);
+                    links.Add(link.Attribute("title").Value, string.Format(urlTemplate, urlParts[urlParts.Length - 1]));
+                }
+
+                foreach (var link in links)
+                {
+                    Console.WriteLine(link);
+                    try
+                    {
+                        WebClient wc = new WebClient();
+                        Uri uri = new Uri(link.Value);
+                        string unpackDir = @"C:\Users\Сергей\Downloads\Книги\";
+                        string zipToUnpack = unpackDir + link.Key + ".zip";
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("Downloading begin");
+                        Console.ResetColor();
+                        wc.DownloadFile(uri, zipToUnpack);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Book succeseful download");
+                        Console.ResetColor();
+
+                        using (ZipFile zip = ZipFile.Read(zipToUnpack))
+                        {
+                            Stream s = new MemoryStream();
+                            foreach (ZipEntry e in zip)
+                            {
+                                e.Extract(s);
+                                byte[] bytes = new byte[s.Length];
+                                s.Read(bytes, 0, (int)s.Length);
+                                File.WriteAllBytes(unpackDir + link.Key + ".fb2", bytes);
+                            }
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Unpack succeseful");
+                            Console.ResetColor();
+                        }
+                        File.Delete(zipToUnpack);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(e);
+                        Console.ResetColor();
+                    }
                 }
             }
-
+            Console.WriteLine("Done");
             Console.Read();
         }
     }
