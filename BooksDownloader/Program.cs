@@ -14,7 +14,7 @@ namespace BooksDownloader
         static void Main(string[] args)
         {
             Console.WriteLine("BOOKS DOWNLOADER");
-            for (int i = 1; i <= 10; i++)
+            for (int i = 10; i <= 50; i++)
             {
                 string url = "http://knigosite.org/library/genres/110/page/" + i.ToString();
                 string html = String.Empty;
