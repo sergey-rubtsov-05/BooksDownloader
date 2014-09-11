@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.IO;
 using System.Xml.Linq;
@@ -11,17 +9,16 @@ namespace BooksDownloader
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Console.WriteLine("BOOKS DOWNLOADER");
-            for (int i = 10; i <= 50; i++)
+            for (int i = 1; i <= 50; i++)
             {
-                string url = "http://knigosite.org/library/genres/110/page/" + i.ToString();
-                string html = String.Empty;
+                string url = "http://knigosite.org/library/genres/110/page/" + i;
                 HttpWebRequest myRequest = (HttpWebRequest)HttpWebRequest.Create(url);
                 HttpWebResponse myResponse = (HttpWebResponse)myRequest.GetResponse();
                 StreamReader stream = new StreamReader(myResponse.GetResponseStream());
-                html = stream.ReadToEnd();
+                string html = stream.ReadToEnd();
                 //File.Create(@"C:\Users\Сергей\Desktop\1.xml");
                 while (html.IndexOf('&') != -1)
                 {
@@ -88,7 +85,9 @@ namespace BooksDownloader
                             {
                                 e.Extract(s);
                                 byte[] bytes = new byte[s.Length];
-                                s.Read(bytes, 0, (int)s.Length);
+                                s.Seek(0, SeekOrigin.Begin);
+                                int len = s.Read(bytes, 0, (int)s.Length);
+                                Console.WriteLine("Прочитано {0} байт",len);
                                 File.WriteAllBytes(unpackDir + link.Key + ".fb2", bytes);
                             }
                             Console.ForegroundColor = ConsoleColor.Green;
